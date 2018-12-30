@@ -76,7 +76,7 @@ void reconstruct(const Mat& K, const Mat& R, const Mat& T, const vector<Point2f>
 */
 void getMats(const Mat src1, const Mat src2, const Mat K, Mat& E, Mat& F, Mat& H, Mat& R, Mat& T)
 {
-	cout << "running getEssentialMat()\n";
+	cout << "running getMats()\n";
 
 	if (src1.data == NULL || src2.data == NULL)
 	{
@@ -172,7 +172,7 @@ void getMats(const Mat src1, const Mat src2, const Mat K, Mat& E, Mat& F, Mat& H
 		Mat useE = y2.t()*E*y1;
 		Mat useF = z2.t()*F*z1;
 
-		cout << "epipolar constraint: " << "mask = " << (matchesMask[++maskIdx] == 1) << "\t" << useF << "\t"<< useE << "\t" << useRS << endl;
+		cout << "epipolar constraint: " << "mask = " << (matchesMask[maskIdx++] == 1) << "\t" << useF << "\t"<< useE << "\t" << useRS << endl;
 	}
 	cout << "\n\n\n";
 
@@ -180,7 +180,7 @@ void getMats(const Mat src1, const Mat src2, const Mat K, Mat& E, Mat& F, Mat& H
 	Mat structure;
 	vector<Point2f> ps1, ps2; // 待重建的点数组
 	int pCount=0;
-	for (int i = 1; i <= matches.size(); i++)
+	for (int i = 20; i < matches.size(); i++)
 	{
 		int index1 = matches[i].queryIdx;
 		int index2 = matches[i].trainIdx;
