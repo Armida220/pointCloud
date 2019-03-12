@@ -13,21 +13,63 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\calibration">
+      <UniqueIdentifier>{74799090-f1b3-4fff-9061-2488b76329c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinocularVision.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="myCalibration.cpp">
+    <ClCompile Include="others.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="myCalibration.cpp">
+      <Filter>源文件\calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="example.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="calibration.cpp">
+      <Filter>源文件\calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="patternDetect.cpp">
+      <Filter>源文件\calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="evaluateImages.cpp">
+      <Filter>源文件\calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="saveResult.cpp">
+      <Filter>源文件\calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="calibration_test.cpp">
+      <Filter>源文件\calibration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="def.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="myCalibration.h">
+    <ClInclude Include="extract_features.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="calibration.h">
+      <Filter>源文件\calibration</Filter>
+    </ClInclude>
+    <ClInclude Include="patternDetect.h">
+      <Filter>源文件\calibration</Filter>
+    </ClInclude>
+    <ClInclude Include="myCalibration.h">
+      <Filter>源文件\calibration</Filter>
+    </ClInclude>
+    <ClInclude Include="evaluateImages.h">
+      <Filter>源文件\calibration</Filter>
+    </ClInclude>
+    <ClInclude Include="saveResult.h">
+      <Filter>源文件\calibration</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>源文件\calibration</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

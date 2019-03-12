@@ -1,5 +1,7 @@
 #include "myCalibration.h"
 
+using namespace cv;
+using namespace std;
 
 
 myCalibration::myCalibration()
@@ -11,29 +13,28 @@ myCalibration::~myCalibration()
 {
 }
 
-
 /*
 @param infile 目录文件的路径,其中保存了所有用于相机标定的文件名
 @param K      储存相机内部矩阵
 */
-void myCalibration::getIntrinsicMat(std::string infile, cv::Mat& K)
+void myCalibration::getIntrinsicMat(std::string infile, cv::Mat& K, cv::Mat& distCoeffs)
 {
-
-	using namespace cv;
-	using namespace std;
-
-    cout << "running getIntrinsicMat function!\n";
 	cout << "开始检测角点................\n";
 
 	ifstream fin(infile); 
 	int imgCount = 0; // 标定用图像的总数
 	Size imgSize; // 图像尺寸(默认所有图像尺寸一致，且由第一幅图像得到)
-	Size boardSize = Size(BOARDSIZEX, BOARDSIZEY); // 棋盘每行每列的角点数
+	Size boardSize = Size(BOARDSIZEX-1, BOARDSIZEY-1); // 棋盘每行每列的角点数
 	vector<Point2f> imgPointsBuf; // 缓存一副图像上检测到的角点
-	vector<vector<Point2f>> imgPointsSeq; // 储存所有图像上的角点
-	
+	float squareSize = SQUARESIZE; // 每个棋盘格的真实大小
+	vector<vector<Point3f>> objectPoints(1); // 保存角点的三维坐标
+	vector<vector<Point2f>> imagePoints;  // 保存角点的二维坐标
 
-// 提取角点#########################################################	
+	vector<Mat> rvecsMat;  // 存储所有图像的旋转向量
+	vector<Mat> tvecsMat;  // 存储所有图像的平移向量
+
+
+// ----------------------提取角点----------------------------	
 	string filename; // 缓存图像名
 	string filePosition; 
 	while (getline(fin, filename))
@@ -50,89 +51,190 @@ void myCalibration::getIntrinsicMat(std::string infile, cv::Mat& K)
 		}
 
 		// 用findChessboardCorners()函数提取角点，保存到imgPointsBuf中
-		if (!findChessboardCorners(imgInput, boardSize, imgPointsBuf))
+		if (!findChessboardCorners(imgInput, boardSize, imgPointsBuf, CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE
+			+ CALIB_CB_FAST_CHECK))
 		{
-			cout << filename <<"中检测不到角点";
+			cout << filename <<"中检测不到角点\n";
 			exit(1);
 		}
 		else
 		{
 			Mat view_gray;
 			cvtColor(imgInput, view_gray, COLOR_RGB2GRAY);
+			
+			cout << imgPointsBuf;
 			// 亚像素精确化
-			find4QuadCornerSubpix(view_gray, imgPointsBuf, Size(11, 11)); //对粗提取的角点进行精确化
-			imgPointsSeq.push_back(imgPointsBuf);  //保存亚像素角点
+			//find4QuadCornerSubpix(view_gray, imgPointsBuf, Size(11, 11)); 
+//			TermCriteria termcrit(TermCriteria::COUNT | TermCriteria::EPS, 20, 0.03);
+			cornerSubPix(view_gray, imgPointsBuf, cv::Size(5, 5), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
+
+
+			imagePoints.push_back(imgPointsBuf);  //保存亚像素角点
 			// 显示角点位置
 			//drawChessboardCorners(view_gray, boardSize, imgPointsBuf, true);
 			//imshow("Camera Calibration", view_gray);
 			//waitKey(500);
 		}
 	}
-	cout << "角点提取完成" << endl;
 
-// 相机标定##############################################################
+	cout << "角点提取完成!\n";
 	cout << "开始相机标定.........\n";
+// -------------------------------------------------
+	// 初始化标定板上角点的坐标
+	calcBoardCornerPositions(boardSize, squareSize, objectPoints[0]);
+	objectPoints.resize(imagePoints.size(), objectPoints[0]);
 
-	Size squareSize = Size(SQUARESIZEX, SQUARESIZEY); // 每个棋盘格的真实大小
-	vector<vector<Point3f>> objectPoints; // 保存角点的三维坐标
-	vector<int> pointCounts;  // 每幅图像中角点的数量
-	Mat distCoeffs = Mat(1, 5, CV_32FC1, Scalar::all(0)); // 摄像机的5个畸变系数：k1,k2,p1,p2,k3
-	vector<Mat> rvecsMat;  // 存储每幅图像的旋转向量
-	vector<Mat> tvecsMat;  // 存储每幅图像的平移向量 
+	// 用calibrateCamera()计算相机的内部矩阵、每张图片相对于原点的平移矩阵和旋转矩阵
+	calibrateCamera(objectPoints, imagePoints, imgSize, K, distCoeffs, rvecsMat, tvecsMat);
+	
+
+	cout << "\tK:\n\t" << K << endl;
+	cout << "\tdistCoeffs:\n\t" << distCoeffs << endl;
+
+	// 计算重投影误差
+	vector<float> reprojErrs;
+	float totalAvgErr = 0;
+	computeReprojectionErrors(imgCount, objectPoints,
+		rvecsMat, tvecsMat, K, distCoeffs, 
+		imagePoints, reprojErrs, &totalAvgErr);
+
+
+
+	cout << "标定结束\n";
+	cout << "保存标定结果\n";
+	// 保存到文件
+	saveToFile("./result_1.yml", imgSize, boardSize, squareSize,
+		K, distCoeffs,
+		rvecsMat, tvecsMat,
+		reprojErrs,
+		imagePoints,
+		&totalAvgErr);
+	cout << "保存结束\n";
+
+}
+
+void  myCalibration::calcBoardCornerPositions(Size boardSize, float squareSize,
+	vector<Point3f>& corners
+)
+{
+	corners.clear();
 
 	// 初始化标定板上角点的坐标，假设所有的角点都处于Z=0的平面上，且棋盘靠左上的第一个角点为（0，0，0）
-	int i, j, t;
-	for (t = 0; t < imgCount; t++)
-	{
-		vector<Point3f> tempPointSet;
-		for (i = 0; i < boardSize.height; i++)
-		{
-			for (j = 0; j < boardSize.width; j++)
-			{
-				Point3f realPoint;
-				// 假设标定板放在世界坐标系中z=0的平面上 
-				realPoint.x = i * squareSize.width;
-				realPoint.y = j * squareSize.height;
-				realPoint.z = 0;
-				tempPointSet.push_back(realPoint);
-			}
-		}
-		objectPoints.push_back(tempPointSet);
-		// 初始化每幅图像中的角点数量，假定每幅图像中都可以看到完整的标定板
-		pointCounts.push_back(boardSize.width*boardSize.height);
-	}
-	// 用calibrateCamera()计算相机的内部矩阵，每张图片相对于原点的平移矩阵和旋转矩阵
-	calibrateCamera(objectPoints, imgPointsSeq, imgSize, K, distCoeffs, rvecsMat, tvecsMat);
-	cout << "内部矩阵K:\n " << K << endl;
+	vector<Point3f> tempPointSet;
+	for (int i = 0; i < boardSize.height; i++)
+		for (int j = 0; j < boardSize.width; j++)
+			corners.push_back(Point3f(j*squareSize, i*squareSize, 0));
+}
 
 
-//对标定结果进行评价#######################################
-	cout << "开始评价标定结果………………\n";
-	double total_err = 0.0; // 所有图像的平均误差的总和
-	double err = 0.0; // 每幅图像的平均误差
+void myCalibration::computeReprojectionErrors(
+	int imgCount, 
+	vector<vector<Point3f>> objectPoints,
+	const vector<Mat>& rvecsMat,
+	const vector<Mat>& tvecsMat,
+	const Mat& K,
+	const Mat& distCoeffs,
+	const vector<vector<Point2f>>& imagePoints,
+	vector<float>& reprojErrs,
+	float* totalErrs
+)
+{
+	cout << "\t开始评价标定结果………………\n";
+	size_t totalPoints = 0;
+	float err = 0.0;       
 	vector<Point2f> image_points2; // 保存用内部矩阵重新计算得到的投影点
-	cout << "\t每幅图像的标定误差：\n";
-	for (i = 0; i < imgCount; i++)
+	cout << "\t\t每幅图像的标定误差：\n";
+	for (int i = 0; i < imgCount; i++)
 	{
-		vector<Point3f> tempPointSet = objectPoints[i];
 		// 通过得到的摄像机内外参数，对棋盘的角点进行重新投影计算，保存到image_points2中
-		projectPoints(tempPointSet, rvecsMat[i], tvecsMat[i], K, distCoeffs, image_points2);
-		
-		// 计算新的投影点和旧的投影点之间的误差
-		vector<Point2f> tempImagePoint = imgPointsSeq[i];
-		Mat tempImagePointMat = Mat(1, tempImagePoint.size(), CV_32FC2);
-		Mat image_points2Mat = Mat(1, image_points2.size(), CV_32FC2);
-		for (int j = 0; j < tempImagePoint.size(); j++)
-		{
-			image_points2Mat.at<Vec2f>(0, j) = Vec2f(image_points2[j].x, image_points2[j].y);
-			tempImagePointMat.at<Vec2f>(0, j) = Vec2f(tempImagePoint[j].x, tempImagePoint[j].y);
-		}
-		err = norm(image_points2Mat, tempImagePointMat, NORM_L2);
-		total_err += err /= pointCounts[i];
-		cout << "第" << i + 1 << "幅图像的平均误差：" << err << "像素" << endl;
+		projectPoints(objectPoints[i], rvecsMat[i], tvecsMat[i], K, distCoeffs, image_points2);
+
+		// 计算重投影点和投影点之间的误差
+		err = norm(imagePoints[i], image_points2, NORM_L2);
+
+		size_t n = objectPoints[i].size();
+		float perViewErr = (float)std::sqrt(err*err / n);
+		cout << "\t\t\t第" << i + 1 << "幅图像的平均误差：" << perViewErr << "像素" << endl;
+		reprojErrs.push_back(perViewErr);
+		*totalErrs += err * err;
+		totalPoints += n;
+		//totalErr += err /= objectPoints[i].size();
+		//cout << "\t\t\t第" << i + 1 << "幅图像的平均误差：" << err << "像素" << endl;
 	}
-	cout << "总体平均误差：" << total_err / imgCount << "像素" << endl;
-	cout << "评价完成\n";
-	cout << "finish getIntrinsicMat function!\n\n\n";
+
+	*totalErrs = sqrt(*totalErrs / totalPoints);
+	cout << "\t\t总体平均误差：" << *totalErrs << "像素" << endl;
+	
+	
+	cout << "\t评价完成\n";
+}
+
+
+void myCalibration::saveToFile(string outputFileName, Size imageSize, Size boardSize, float squareSize,
+	Mat& cameraMatrix, Mat& distCoeffs,
+	const vector<Mat>& rvecs, const vector<Mat>& tvecs,
+	const vector<float>& reprojErrs, 
+	const vector<vector<Point2f> >& imagePoints,
+	float* totalAvgErr
+)
+{
+	FileStorage fs(outputFileName, FileStorage::WRITE);
+
+	struct tm t2;
+	time_t tm;
+	time(&tm);
+	localtime_s(&t2, &tm);
+	char buf[1024];
+	strftime(buf, sizeof(buf), "%c", &t2);
+
+	fs << "calibration_time" << buf;
+
+	if (!rvecs.empty() || !reprojErrs.empty())
+		fs << "nr_of_frames" << (int)std::max(rvecs.size(), reprojErrs.size());
+	fs << "image_width" << imageSize.width;
+	fs << "image_height" << imageSize.height;
+	fs << "board_width" << boardSize.width;
+	fs << "board_height" << boardSize.height;
+	fs << "square_size" << squareSize;
+
+	fs << "camera_matrix" << cameraMatrix;
+	fs << "distortion_coefficients" << distCoeffs;
+
+	fs << "avg_reprojection_error" << *totalAvgErr;
+	//if (s.writeExtrinsics && !reprojErrs.empty())
+	//	fs << "per_view_reprojection_errors" << Mat(reprojErrs);
+
+	//if (s.writeExtrinsics && !rvecs.empty() && !tvecs.empty())
+	//{
+	//	CV_Assert(rvecs[0].type() == tvecs[0].type());
+	//	Mat bigmat((int)rvecs.size(), 6, CV_MAKETYPE(rvecs[0].type(), 1));
+	//	bool needReshapeR = rvecs[0].depth() != 1 ? true : false;
+	//	bool needReshapeT = tvecs[0].depth() != 1 ? true : false;
+
+	//	for (size_t i = 0; i < rvecs.size(); i++)
+	//	{
+	//		Mat r = bigmat(Range(int(i), int(i + 1)), Range(0, 3));
+	//		Mat t = bigmat(Range(int(i), int(i + 1)), Range(3, 6));
+
+	//		if (needReshapeR)
+	//			rvecs[i].reshape(1, 1).copyTo(r);
+	//		else
+	//		{
+	//			//*.t() is MatExpr (not Mat) so we can use assignment operator
+	//			CV_Assert(rvecs[i].rows == 3 && rvecs[i].cols == 1);
+	//			r = rvecs[i].t();
+	//		}
+
+	//		if (needReshapeT)
+	//			tvecs[i].reshape(1, 1).copyTo(t);
+	//		else
+	//		{
+	//			CV_Assert(tvecs[i].rows == 3 && tvecs[i].cols == 1);
+	//			t = tvecs[i].t();
+	//		}
+	//	}
+	//	fs.writeComment("a set of 6-tuples (rotation vector + translation vector) for each view");
+	//	fs << "extrinsic_parameters" << bigmat;
+	//}
 }
 

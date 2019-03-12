@@ -4,3 +4,7 @@
 ./doucument/        存放文档，算法说明等
 ./PointCloud/       存放项目代码
 ./photo/            存放双目视觉所用的图片(800*600) 
+
+
+#update records
+2019/3/12： add camera calibration mod，use .xml file as setting iput

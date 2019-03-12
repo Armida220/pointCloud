@@ -155,11 +155,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BinocularVision.cpp" />
+    <ClCompile Include="calibration.cpp" />
+    <ClCompile Include="calibration_test.cpp" />
+    <ClCompile Include="evaluateImages.cpp" />
+    <ClCompile Include="example.cpp" />
     <ClCompile Include="myCalibration.cpp" />
+    <ClCompile Include="others.cpp" />
+    <ClCompile Include="patternDetect.cpp" />
+    <ClCompile Include="saveResult.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="calibration.h" />
     <ClInclude Include="def.h" />
+    <ClInclude Include="evaluateImages.h" />
+    <ClInclude Include="extract_features.h" />
     <ClInclude Include="myCalibration.h" />
+    <ClInclude Include="patternDetect.h" />
+    <ClInclude Include="saveResult.h" />
+    <ClInclude Include="settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
