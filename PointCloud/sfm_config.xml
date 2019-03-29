@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<Settings>
+  <!-- the dir where images stored -->
+  <Image_Dir>"E:\\Downloads\\tools\\OpenCV_SFM-master\\img\\"</Image_Dir>
+  <!-- the dir where images stored -->
+  <Save_File>"structure.yml"</Save_File>
+
+  <Calibrated>1</Calibrated>
+  <!-- If true (non-zero) use camera_matrix.-->
+  <camera_matrix type_id="opencv-matrix">
+    <rows>3</rows>
+    <cols>3</cols>
+    <dt>d</dt>
+    <data>
+    3.071477e+03 0. 1.066067e+03 0.
+    3.069834e+03 1.929784e+03 0. 0. 1.</data></camera_matrix>
+  
+  <distortion_coefficients type_id="opencv-matrix">
+    <rows>5</rows>
+    <cols>1</cols>
+    <dt>d</dt>
+    <data>
+    -2.6536920532088049e-01 5.9037416926983100e-01
+    7.1434815293972866e-04 3.2187538192956666e-02
+    -8.9319787447414301e-01</data></distortion_coefficients>
+
+  <!-- If false (zero) use calibration mode-->
+  <Calibration_Config_File>".\\calbration_config.xml"</Calibration_Config_File>
+
+<!-- SIFT;SURF; -->
+<Extracter_Type>SIFT</Extracter_Type>
+
+<!-- Knn;BF; -->
+<Matcher_Type>BF</Matcher_Type>
+
+</Settings>
+</opencv_storage>

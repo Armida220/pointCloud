@@ -16,12 +16,30 @@
     <Filter Include="源文件\calibration">
       <UniqueIdentifier>{74799090-f1b3-4fff-9061-2488b76329c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\feature">
+      <UniqueIdentifier>{634492e8-8346-4584-b807-6ca054b897e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\imageIO">
+      <UniqueIdentifier>{3b7d3147-9247-42cc-84c2-ee91b9c2c273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\bundleAdjustment">
+      <UniqueIdentifier>{10b61da9-f8c8-4284-9428-9ea760efb6a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\multiView">
+      <UniqueIdentifier>{86add174-7728-409a-ae98-e8da0c9a31ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\sfm">
+      <UniqueIdentifier>{d693ba9e-ddb9-43a6-be59-d705170c2b00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\feature\matcher">
+      <UniqueIdentifier>{994a90b1-4837-42dd-875b-056d220640db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\feature\extracter">
+      <UniqueIdentifier>{00caf84e-1ec1-4ff7-b9fb-9155e3a504f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BinocularVision.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="others.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="myCalibration.cpp">
@@ -42,8 +60,41 @@
     <ClCompile Include="saveResult.cpp">
       <Filter>源文件\calibration</Filter>
     </ClCompile>
-    <ClCompile Include="calibration_test.cpp">
+    <ClCompile Include="image.cpp">
+      <Filter>源文件\imageIO</Filter>
+    </ClCompile>
+    <ClCompile Include="calibration_test.h">
       <Filter>源文件\calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="stereo.cpp">
+      <Filter>源文件\multiView</Filter>
+    </ClCompile>
+    <ClCompile Include="projection.cpp">
+      <Filter>源文件\multiView</Filter>
+    </ClCompile>
+    <ClCompile Include="epipolar.cpp">
+      <Filter>源文件\multiView</Filter>
+    </ClCompile>
+    <ClCompile Include="common.cpp">
+      <Filter>源文件\multiView</Filter>
+    </ClCompile>
+    <ClCompile Include="sfmDataIO.cpp">
+      <Filter>源文件\sfm</Filter>
+    </ClCompile>
+    <ClCompile Include="sfm.cpp">
+      <Filter>源文件\sfm</Filter>
+    </ClCompile>
+    <ClCompile Include="bundleAduestment.cpp">
+      <Filter>源文件\bundleAdjustment</Filter>
+    </ClCompile>
+    <ClCompile Include="matcherType.cpp">
+      <Filter>源文件\feature\matcher</Filter>
+    </ClCompile>
+    <ClCompile Include="extractFeatures.cpp">
+      <Filter>源文件\feature\extracter</Filter>
+    </ClCompile>
+    <ClCompile Include="extracterType.cpp">
+      <Filter>源文件\feature\extracter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +121,51 @@
     </ClInclude>
     <ClInclude Include="settings.h">
       <Filter>源文件\calibration</Filter>
+    </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>源文件\imageIO</Filter>
+    </ClInclude>
+    <ClInclude Include="bundleAdjustment.h">
+      <Filter>源文件\bundleAdjustment</Filter>
+    </ClInclude>
+    <ClInclude Include="projection.h">
+      <Filter>源文件\multiView</Filter>
+    </ClInclude>
+    <ClInclude Include="epipolar.h">
+      <Filter>源文件\multiView</Filter>
+    </ClInclude>
+    <ClInclude Include="stereo.h">
+      <Filter>源文件\multiView</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>源文件\multiView</Filter>
+    </ClInclude>
+    <ClInclude Include="sfm.h">
+      <Filter>源文件\sfm</Filter>
+    </ClInclude>
+    <ClInclude Include="sfmDataIO.h">
+      <Filter>源文件\sfm</Filter>
+    </ClInclude>
+    <ClInclude Include="matcherType.h">
+      <Filter>源文件\feature\matcher</Filter>
+    </ClInclude>
+    <ClInclude Include="matcher.h">
+      <Filter>源文件\feature\matcher</Filter>
+    </ClInclude>
+    <ClInclude Include="matcher_knn.h">
+      <Filter>源文件\feature\matcher</Filter>
+    </ClInclude>
+    <ClInclude Include="matcher_bruteForce.h">
+      <Filter>源文件\feature\matcher</Filter>
+    </ClInclude>
+    <ClInclude Include="extracterType.h">
+      <Filter>源文件\feature\extracter</Filter>
+    </ClInclude>
+    <ClInclude Include="extracter.h">
+      <Filter>源文件\feature\extracter</Filter>
+    </ClInclude>
+    <ClInclude Include="extracter_sift.h">
+      <Filter>源文件\feature\extracter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
